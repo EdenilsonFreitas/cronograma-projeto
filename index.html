@@ -51,7 +51,7 @@
         <!-- Controles e Filtros -->
         <div class="controls">
             <div class="filter-group">
-                <select id="filter-responsible">
+                <select id="filter-responsible" aria-label="Filtrar por responsável">
                     <option value="ALL">Todos os Responsáveis</option>
                     <option value="Emmanuel">Emmanuel</option>
                     <option value="Arialyson">Arialyson</option>
@@ -60,21 +60,21 @@
                     <option value="Toda Equipe">Toda Equipe</option>
                 </select>
 
-                <select id="filter-status">
+                <select id="filter-status" aria-label="Filtrar por status">
                     <option value="ALL">Todos os Status</option>
                     <option value="Concluído">Concluído</option>
                     <option value="Andamento">Andamento</option>
                     <option value="Pendente">Pendente</option>
                 </select>
 
-                <input type="text" id="search-input" placeholder="Buscar por atividade...">
+                <input type="text" id="search-input" placeholder="Buscar por atividade..." aria-label="Buscar atividade">
             </div>
 
             <div class="btn-group">
-                <button class="btn btn-primary" id="btn-export-ics">
+                <button type="button" class="btn btn-primary" id="btn-export-ics">
                     📅 Exportar iCal (.ics)
                 </button>
-                <button class="btn btn-secondary" id="btn-add-task">
+                <button type="button" class="btn btn-secondary" id="btn-add-task">
                     ➕ Nova Atividade
                 </button>
             </div>
@@ -119,7 +119,7 @@
     </div>
 
     <!-- Modal para Adicionar / Editar Tarefa -->
-    <div class="modal" id="task-modal">
+    <div class="modal" id="task-modal" role="dialog" aria-labelledby="modal-title" aria-hidden="true">
         <div class="modal-content">
             <h2 id="modal-title">Adicionar Atividade</h2>
             <form id="task-form">
@@ -128,14 +128,18 @@
                 <div class="form-group">
                     <label for="task-phase">Fase</label>
                     <select id="task-phase" required>
-                        <option value="FASE 1: INFRAESTRUTURA FÍSICA (CAD) & ARQUITETURA LÓGICA DE REDE">FASE 1:
-                            INFRAESTRUTURA FÍSICA (CAD) & ARQUITETURA LÓGICA DE REDE</option>
-                        <option value="FASE 2: SERVIÇOS DE REDE NA VM UBUNTU SERVER & SEGURANÇA">FASE 2: SERVIÇOS DE
-                            REDE NA VM UBUNTU SERVER & SEGURANÇA</option>
-                        <option value="FASE 3: GESTÃO FINANCEIRA & COTAÇÃO DE EQUIPAMENTOS">FASE 3: GESTÃO FINANCEIRA &
-                            COTAÇÃO DE EQUIPAMENTOS</option>
-                        <option value="FASE 4: DOCUMENTAÇÃO TÉCNICA, SUBMISSÃO E DEFESA ORAL">FASE 4: DOCUMENTAÇÃO
-                            TÉCNICA, SUBMISSÃO E DEFESA ORAL</option>
+                        <option value="FASE 1: INFRAESTRUTURA FÍSICA (CAD) & ARQUITETURA LÓGICA DE REDE">
+                            FASE 1: INFRAESTRUTURA FÍSICA (CAD) & ARQUITETURA LÓGICA DE REDE
+                        </option>
+                        <option value="FASE 2: SERVIÇOS DE REDE NA VM UBUNTU SERVER & SEGURANÇA">
+                            FASE 2: SERVIÇOS DE REDE NA VM UBUNTU SERVER & SEGURANÇA
+                        </option>
+                        <option value="FASE 3: GESTÃO FINANCEIRA & COTAÇÃO DE EQUIPAMENTOS">
+                            FASE 3: GESTÃO FINANCEIRA & COTAÇÃO DE EQUIPAMENTOS
+                        </option>
+                        <option value="FASE 4: DOCUMENTAÇÃO TÉCNICA, SUBMISSÃO E DEFESA ORAL">
+                            FASE 4: DOCUMENTAÇÃO TÉCNICA, SUBMISSÃO E DEFESA ORAL
+                        </option>
                     </select>
                 </div>
 
@@ -172,6 +176,7 @@
             </form>
         </div>
     </div>
+
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>

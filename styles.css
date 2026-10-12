@@ -14,6 +14,7 @@
     --color-blue-text: #1e40af;
 }
 
+/* Reset Global - Correção aqui (* em vez de -) */
 * {
     box-sizing: border-box;
     margin: 0;
@@ -173,7 +174,7 @@ select, input[type="text"] {
 table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 1000px; /* Garante que a estrutura da tabela fique perfeita ao rolar */
+    min-width: 1000px;
     font-size: 0.85rem;
 }
 
@@ -222,7 +223,7 @@ th, td {
 .badge-andamento { background: #e0f2fe; color: #0369a1; }
 .badge-pendente { background: #f1f5f9; color: #475569; }
 
-/* Marcação de Células ativas */
+/* Marcação de Células Ativas */
 .cell-active-green {
     background-color: var(--color-green-bg);
     color: var(--color-green-text);

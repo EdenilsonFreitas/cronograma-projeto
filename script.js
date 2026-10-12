@@ -1,13 +1,6 @@
 // =========================================================================
 // 1. CONFIGURAÇÃO DO FIREBASE
-// Cole dentro deste objeto o seu bloco "firebaseConfig" copiado do Firebase:
 // =========================================================================
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyCsA0MhYF_7yYgrakxxo-LBMdTAOZGwjNE",
   authDomain: "projeto-cronograma-integrador.firebaseapp.com",
@@ -18,9 +11,7 @@ const firebaseConfig = {
   appId: "1:719347743252:web:4e182d4aab00d2fc104501"
 };
 
-
-
-// Inicialização do Firebase
+// Inicialização do Firebase (usando as bibliotecas Compat do index.html)
 firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
 const tasksRef = database.ref("tarefas");
@@ -156,14 +147,11 @@ let tasks = [];
 document.addEventListener("DOMContentLoaded", () => {
     initWeekCheckboxes();
 
-    // Ouve qualquer alteração na base de dados em tempo real
     tasksRef.on("value", (snapshot) => {
         const data = snapshot.val();
         if (data) {
-            // Se existirem dados no Firebase, atualiza a lista local do utilizador
             tasks = Array.isArray(data) ? data : Object.values(data);
         } else {
-            // Se for a primeira vez e o banco estiver vazio, publica a estrutura inicial
             tasks = [...initialData];
             salvarNoFirebase();
         }
@@ -171,21 +159,17 @@ document.addEventListener("DOMContentLoaded", () => {
         updateDashboard();
     });
 
-    // Listeners dos Filtros
     document.getElementById("filter-responsible").addEventListener("change", renderTable);
     document.getElementById("filter-status").addEventListener("change", renderTable);
     document.getElementById("search-input").addEventListener("input", renderTable);
 
-    // Eventos da Modal
     document.getElementById("btn-add-task").addEventListener("click", () => openModal());
     document.getElementById("btn-cancel-modal").addEventListener("click", closeModal);
     document.getElementById("task-form").addEventListener("submit", handleFormSubmit);
 
-    // Exportação do Ficheiro de Agenda (.ics)
     document.getElementById("btn-export-ics").addEventListener("click", exportToICS);
 });
 
-// Guardar lista atualizada na base de dados em tempo real
 function salvarNoFirebase() {
     tasksRef.set(tasks);
 }
@@ -202,7 +186,6 @@ function renderTable() {
     const statusFilter = document.getElementById("filter-status").value;
     const searchText = document.getElementById("search-input").value.toLowerCase();
 
-    // Filtragem
     const filteredTasks = tasks.filter(t => {
         if (!t) return false;
         const matchesResp = respFilter === "ALL" || t.responsavel === respFilter;
@@ -211,28 +194,23 @@ function renderTable() {
         return matchesResp && matchesStatus && matchesSearch;
     });
 
-    // Agrupar tarefas por fase
     const phases = [...new Set(tasks.filter(t => t != null).map(t => t.fase))];
 
     phases.forEach(phase => {
         const phaseTasks = filteredTasks.filter(t => t.fase === phase);
 
         if (phaseTasks.length > 0) {
-            // Linha com o título da Fase
             const phaseTr = document.createElement("tr");
             phaseTr.innerHTML = `<td colspan="18" class="phase-row">${phase}</td>`;
             tbody.appendChild(phaseTr);
 
-            // Linhas de Atividades
             phaseTasks.forEach(task => {
                 const tr = document.createElement("tr");
 
-                // Badge de Status
                 let badgeClass = "badge-pendente";
                 if (task.status === "Concluído") badgeClass = "badge-concluido";
                 if (task.status === "Andamento") badgeClass = "badge-andamento";
 
-                // Gerar células das 14 Semanas
                 let weeksHtml = "";
                 for (let i = 1; i <= 14; i++) {
                     const isActive = task.semanas && task.semanas.includes(i);
@@ -262,7 +240,6 @@ function renderTable() {
     });
 }
 
-// Atualização do Dashboard e Barra de Progresso
 function updateDashboard() {
     const validTasks = tasks.filter(t => t != null);
     const total = validTasks.length;
@@ -281,7 +258,6 @@ function updateDashboard() {
     document.getElementById("progress-fill").style.width = `${percent}%`;
 }
 
-// Gerar Checkboxes S1 a S14 na Modal
 function initWeekCheckboxes() {
     const container = document.getElementById("weeks-checkboxes");
     if (!container) return;
@@ -295,7 +271,6 @@ function initWeekCheckboxes() {
     }
 }
 
-// Abrir Modal (Adicionar / Editar)
 function openModal(id = null) {
     const modal = document.getElementById("task-modal");
     const form = document.getElementById("task-form");
@@ -328,7 +303,6 @@ function closeModal() {
     document.getElementById("task-modal").classList.remove("active");
 }
 
-// Submeter o Formulário
 function handleFormSubmit(e) {
     e.preventDefault();
 
@@ -357,10 +331,9 @@ function handleFormSubmit(e) {
     }
 
     closeModal();
-    salvarNoFirebase(); // Notifica automaticamente todos os utilizadores ligados!
+    salvarNoFirebase();
 }
 
-// Eliminar Atividade
 function deleteTask(id) {
     if (confirm("Tem a certeza que deseja eliminar esta atividade?")) {
         tasks = tasks.filter(t => t && t.id !== id);
@@ -368,7 +341,6 @@ function deleteTask(id) {
     }
 }
 
-// Exportar Ficheiro iCal (.ics)
 function exportToICS() {
     let icsContent = [
         "BEGIN:VCALENDAR",
