@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cronograma do Projeto</title>
     <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
 
     <div class="container">
@@ -93,10 +95,20 @@
                         <th rowspan="2" class="col-actions">AÇÕES</th>
                     </tr>
                     <tr class="header-sub">
-                        <th>S1</th><th>S2</th><th>S3</th><th>S4</th>
-                        <th>S1</th><th>S2</th><th>S3</th><th>S4</th>
-                        <th>S1</th><th>S2</th><th>S3</th><th>S4</th>
-                        <th>S1</th><th>S2</th>
+                        <th>S1</th>
+                        <th>S2</th>
+                        <th>S3</th>
+                        <th>S4</th>
+                        <th>S1</th>
+                        <th>S2</th>
+                        <th>S3</th>
+                        <th>S4</th>
+                        <th>S1</th>
+                        <th>S2</th>
+                        <th>S3</th>
+                        <th>S4</th>
+                        <th>S1</th>
+                        <th>S2</th>
                     </tr>
                 </thead>
                 <tbody id="cronograma-body">
@@ -112,14 +124,18 @@
             <h2 id="modal-title">Adicionar Atividade</h2>
             <form id="task-form">
                 <input type="hidden" id="task-id">
-                
+
                 <div class="form-group">
                     <label for="task-phase">Fase</label>
                     <select id="task-phase" required>
-                        <option value="FASE 1: INFRAESTRUTURA FÍSICA (CAD) & ARQUITETURA LÓGICA DE REDE">FASE 1: INFRAESTRUTURA FÍSICA (CAD) & ARQUITETURA LÓGICA DE REDE</option>
-                        <option value="FASE 2: SERVIÇOS DE REDE NA VM UBUNTU SERVER & SEGURANÇA">FASE 2: SERVIÇOS DE REDE NA VM UBUNTU SERVER & SEGURANÇA</option>
-                        <option value="FASE 3: GESTÃO FINANCEIRA & COTAÇÃO DE EQUIPAMENTOS">FASE 3: GESTÃO FINANCEIRA & COTAÇÃO DE EQUIPAMENTOS</option>
-                        <option value="FASE 4: DOCUMENTAÇÃO TÉCNICA, SUBMISSÃO E DEFESA ORAL">FASE 4: DOCUMENTAÇÃO TÉCNICA, SUBMISSÃO E DEFESA ORAL</option>
+                        <option value="FASE 1: INFRAESTRUTURA FÍSICA (CAD) & ARQUITETURA LÓGICA DE REDE">FASE 1:
+                            INFRAESTRUTURA FÍSICA (CAD) & ARQUITETURA LÓGICA DE REDE</option>
+                        <option value="FASE 2: SERVIÇOS DE REDE NA VM UBUNTU SERVER & SEGURANÇA">FASE 2: SERVIÇOS DE
+                            REDE NA VM UBUNTU SERVER & SEGURANÇA</option>
+                        <option value="FASE 3: GESTÃO FINANCEIRA & COTAÇÃO DE EQUIPAMENTOS">FASE 3: GESTÃO FINANCEIRA &
+                            COTAÇÃO DE EQUIPAMENTOS</option>
+                        <option value="FASE 4: DOCUMENTAÇÃO TÉCNICA, SUBMISSÃO E DEFESA ORAL">FASE 4: DOCUMENTAÇÃO
+                            TÉCNICA, SUBMISSÃO E DEFESA ORAL</option>
                     </select>
                 </div>
 
@@ -156,7 +172,10 @@
             </form>
         </div>
     </div>
-
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     <script src="script.js"></script>
 </body>
+
 </html>

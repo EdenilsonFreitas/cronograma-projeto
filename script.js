@@ -1,4 +1,33 @@
-// Dados Iniciais mapeados a partir da Imagem
+// =========================================================================
+// 1. CONFIGURAÇÃO DO FIREBASE
+// Cole dentro deste objeto o seu bloco "firebaseConfig" copiado do Firebase:
+// =========================================================================
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyCsA0MhYF_7yYgrakxxo-LBMdTAOZGwjNE",
+  authDomain: "projeto-cronograma-integrador.firebaseapp.com",
+  databaseURL: "https://projeto-cronograma-integrador-default-rtdb.firebaseio.com",
+  projectId: "projeto-cronograma-integrador",
+  storageBucket: "projeto-cronograma-integrador.firebasestorage.app",
+  messagingSenderId: "719347743252",
+  appId: "1:719347743252:web:4e182d4aab00d2fc104501"
+};
+
+
+
+// Inicialização do Firebase
+firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
+const tasksRef = database.ref("tarefas");
+
+// =========================================================================
+// 2. DADOS INICIAIS (Carregados apenas na primeira utilização)
+// =========================================================================
 const initialData = [
     {
         id: 1,
@@ -119,31 +148,54 @@ const initialData = [
     }
 ];
 
-let tasks = [...initialData];
+let tasks = [];
 
-// Inicialização da Aplicação
+// =========================================================================
+// 3. INICIALIZAÇÃO DA APLICAÇÃO E SINCRONIZAÇÃO EM TEMPO REAL
+// =========================================================================
 document.addEventListener("DOMContentLoaded", () => {
     initWeekCheckboxes();
-    renderTable();
-    updateDashboard();
 
-    // Event Listeners dos Filtros
+    // Ouve qualquer alteração na base de dados em tempo real
+    tasksRef.on("value", (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+            // Se existirem dados no Firebase, atualiza a lista local do utilizador
+            tasks = Array.isArray(data) ? data : Object.values(data);
+        } else {
+            // Se for a primeira vez e o banco estiver vazio, publica a estrutura inicial
+            tasks = [...initialData];
+            salvarNoFirebase();
+        }
+        renderTable();
+        updateDashboard();
+    });
+
+    // Listeners dos Filtros
     document.getElementById("filter-responsible").addEventListener("change", renderTable);
     document.getElementById("filter-status").addEventListener("change", renderTable);
     document.getElementById("search-input").addEventListener("input", renderTable);
 
-    // Modal Events
+    // Eventos da Modal
     document.getElementById("btn-add-task").addEventListener("click", () => openModal());
     document.getElementById("btn-cancel-modal").addEventListener("click", closeModal);
     document.getElementById("task-form").addEventListener("submit", handleFormSubmit);
 
-    // Exportar .ics
+    // Exportação do Ficheiro de Agenda (.ics)
     document.getElementById("btn-export-ics").addEventListener("click", exportToICS);
 });
 
-// Renderização da Tabela por Fases
+// Guardar lista atualizada na base de dados em tempo real
+function salvarNoFirebase() {
+    tasksRef.set(tasks);
+}
+
+// =========================================================================
+// 4. RENDERIZAÇÃO E LÓGICA DA INTERFACE
+// =========================================================================
 function renderTable() {
     const tbody = document.getElementById("cronograma-body");
+    if (!tbody) return;
     tbody.innerHTML = "";
 
     const respFilter = document.getElementById("filter-responsible").value;
@@ -152,37 +204,38 @@ function renderTable() {
 
     // Filtragem
     const filteredTasks = tasks.filter(t => {
+        if (!t) return false;
         const matchesResp = respFilter === "ALL" || t.responsavel === respFilter;
         const matchesStatus = statusFilter === "ALL" || t.status === statusFilter;
-        const matchesSearch = t.titulo.toLowerCase().includes(searchText);
+        const matchesSearch = t.titulo ? t.titulo.toLowerCase().includes(searchText) : true;
         return matchesResp && matchesStatus && matchesSearch;
     });
 
-    // Agrupar por fase
-    const phases = [...new Set(tasks.map(t => t.fase))];
+    // Agrupar tarefas por fase
+    const phases = [...new Set(tasks.filter(t => t != null).map(t => t.fase))];
 
     phases.forEach(phase => {
         const phaseTasks = filteredTasks.filter(t => t.fase === phase);
 
         if (phaseTasks.length > 0) {
-            // Tr da Fase
+            // Linha com o título da Fase
             const phaseTr = document.createElement("tr");
             phaseTr.innerHTML = `<td colspan="18" class="phase-row">${phase}</td>`;
             tbody.appendChild(phaseTr);
 
-            // Trs das Tarefas
+            // Linhas de Atividades
             phaseTasks.forEach(task => {
                 const tr = document.createElement("tr");
 
-                // Badge do Status
+                // Badge de Status
                 let badgeClass = "badge-pendente";
                 if (task.status === "Concluído") badgeClass = "badge-concluido";
                 if (task.status === "Andamento") badgeClass = "badge-andamento";
 
-                // Montar HTML das 14 Semanas
+                // Gerar células das 14 Semanas
                 let weeksHtml = "";
                 for (let i = 1; i <= 14; i++) {
-                    const isActive = task.semanas.includes(i);
+                    const isActive = task.semanas && task.semanas.includes(i);
                     let cellClass = "";
                     if (isActive) {
                         if (task.cor === "green") cellClass = "cell-active-green";
@@ -209,12 +262,13 @@ function renderTable() {
     });
 }
 
-// Atualizar Dashboard e Progresso
+// Atualização do Dashboard e Barra de Progresso
 function updateDashboard() {
-    const total = tasks.length;
-    const completed = tasks.filter(t => t.status === "Concluído").length;
-    const inProgress = tasks.filter(t => t.status === "Andamento").length;
-    const pending = tasks.filter(t => t.status === "Pendente").length;
+    const validTasks = tasks.filter(t => t != null);
+    const total = validTasks.length;
+    const completed = validTasks.filter(t => t.status === "Concluído").length;
+    const inProgress = validTasks.filter(t => t.status === "Andamento").length;
+    const pending = validTasks.filter(t => t.status === "Pendente").length;
 
     const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
 
@@ -227,9 +281,10 @@ function updateDashboard() {
     document.getElementById("progress-fill").style.width = `${percent}%`;
 }
 
-// Gera checkboxes S1-S14 na Modal
+// Gerar Checkboxes S1 a S14 na Modal
 function initWeekCheckboxes() {
     const container = document.getElementById("weeks-checkboxes");
+    if (!container) return;
     container.innerHTML = "";
     for (let i = 1; i <= 14; i++) {
         container.innerHTML += `
@@ -240,7 +295,7 @@ function initWeekCheckboxes() {
     }
 }
 
-// Modal - Abrir/Editar
+// Abrir Modal (Adicionar / Editar)
 function openModal(id = null) {
     const modal = document.getElementById("task-modal");
     const form = document.getElementById("task-form");
@@ -248,17 +303,19 @@ function openModal(id = null) {
 
     if (id) {
         document.getElementById("modal-title").innerText = "Editar Atividade";
-        const task = tasks.find(t => t.id === id);
-        document.getElementById("task-id").value = task.id;
-        document.getElementById("task-phase").value = task.fase;
-        document.getElementById("task-title").value = task.titulo;
-        document.getElementById("task-responsible").value = task.responsavel;
-        document.getElementById("task-status").value = task.status;
+        const task = tasks.find(t => t && t.id === id);
+        if (task) {
+            document.getElementById("task-id").value = task.id;
+            document.getElementById("task-phase").value = task.fase;
+            document.getElementById("task-title").value = task.titulo;
+            document.getElementById("task-responsible").value = task.responsavel;
+            document.getElementById("task-status").value = task.status;
 
-        const checkboxes = document.querySelectorAll('input[name="weeks"]');
-        checkboxes.forEach(cb => {
-            cb.checked = task.semanas.includes(parseInt(cb.value));
-        });
+            const checkboxes = document.querySelectorAll('input[name="weeks"]');
+            checkboxes.forEach(cb => {
+                cb.checked = task.semanas && task.semanas.includes(parseInt(cb.value));
+            });
+        }
     } else {
         document.getElementById("modal-title").innerText = "Adicionar Atividade";
         document.getElementById("task-id").value = "";
@@ -271,7 +328,7 @@ function closeModal() {
     document.getElementById("task-modal").classList.remove("active");
 }
 
-// Submeter Formulário da Modal
+// Submeter o Formulário
 function handleFormSubmit(e) {
     e.preventDefault();
 
@@ -284,46 +341,45 @@ function handleFormSubmit(e) {
     const checkedWeeks = Array.from(document.querySelectorAll('input[name="weeks"]:checked'))
         .map(cb => parseInt(cb.value));
 
-    // Define a cor baseada na Fase
     let cor = "green";
     if (fase.includes("FASE 2")) cor = "yellow";
     if (fase.includes("FASE 4")) cor = "blue";
 
     if (id) {
-        const index = tasks.findIndex(t => t.id === parseInt(id));
-        tasks[index] = { id: parseInt(id), fase, titulo, responsavel, status, semanas: checkedWeeks, cor };
+        const index = tasks.findIndex(t => t && t.id === parseInt(id));
+        if (index !== -1) {
+            tasks[index] = { id: parseInt(id), fase, titulo, responsavel, status, semanas: checkedWeeks, cor };
+        }
     } else {
-        const newId = tasks.length > 0 ? Math.max(...tasks.map(t => t.id)) + 1 : 1;
+        const validTasks = tasks.filter(t => t != null);
+        const newId = validTasks.length > 0 ? Math.max(...validTasks.map(t => t.id)) + 1 : 1;
         tasks.push({ id: newId, fase, titulo, responsavel, status, semanas: checkedWeeks, cor });
     }
 
     closeModal();
-    renderTable();
-    updateDashboard();
+    salvarNoFirebase(); // Notifica automaticamente todos os utilizadores ligados!
 }
 
-// Deletar Tarefa
+// Eliminar Atividade
 function deleteTask(id) {
-    if (confirm("Tem certeza que deseja excluir esta atividade?")) {
-        tasks = tasks.filter(t => t.id !== id);
-        renderTable();
-        updateDashboard();
+    if (confirm("Tem a certeza que deseja eliminar esta atividade?")) {
+        tasks = tasks.filter(t => t && t.id !== id);
+        salvarNoFirebase();
     }
 }
 
-// Exportar Agenda em Arquivo .ICS (Google Calendar, Outlook, Apple)
+// Exportar Ficheiro iCal (.ics)
 function exportToICS() {
     let icsContent = [
         "BEGIN:VCALENDAR",
         "VERSION:2.0",
-        "PRODID:-//Cronograma Projeto//PT-BR"
+        "PRODID:-//Cronograma Projeto Integrador//PT-PT"
     ];
 
-    // Data base inicial fictícia para a Semana 1 (ex: Primeira semana de Setembro de 2026)
-    const baseDate = new Date(2026, 8, 1); // 01/09/2026
+    const baseDate = new Date(2026, 8, 1);
 
-    tasks.forEach(task => {
-        if (task.semanas.length > 0) {
+    tasks.filter(t => t != null).forEach(task => {
+        if (task.semanas && task.semanas.length > 0) {
             const minWeek = Math.min(...task.semanas);
             const maxWeek = Math.max(...task.semanas);
 
